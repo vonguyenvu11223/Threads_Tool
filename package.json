@@ -33,7 +33,6 @@
       "identity": null
     },
     "dmg": {
-      "//": "Tên ổ đĩa KHÔNG dấu cách — hdiutil trên máy chủ CI hay nghẹn ở /Volumes/<tên có dấu cách>",
       "title": "ThreadsTool",
       "contents": [
         { "x": 140, "y": 200, "type": "file" },

@@ -47,6 +47,13 @@ jobs:
 
       # Rồi mới thử .dmg. Bước này ĐƯỢC PHÉP HỎNG: `hdiutil` hay trục trặc trên
       # máy chủ CI, mà lúc đó .zip ở trên đã có sẵn để dùng.
+      #
+      # ⚠️ Hai điều về cấu hình `build` trong package.json, ghi ở đây vì JSON
+      # không chứa được chú thích:
+      #   1. electron-builder kiểm lược đồ NGHIÊM NGẶT — thêm khoá lạ (kể cả
+      #      `"//"` làm chú thích) là nó từ chối chạy ngay, không bỏ qua.
+      #   2. `dmg.title` để "ThreadsTool" không dấu cách, vì `hdiutil` trên máy
+      #      chủ CI hay nghẹn với đường dẫn kiểu `/Volumes/<tên có dấu cách>`.
       - name: Dựng bản .dmg (cho phép hỏng)
         continue-on-error: true
         run: npx electron-builder --mac dmg --publish never
