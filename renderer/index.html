@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https: data:; font-src 'self'">
+<title>Threads Tool</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ═════════ Thanh bên ═════════ -->
+  <aside class="ben">
+    <div class="hieu">
+      <span class="dau-hieu">@</span>
+      <b>Threads Tool</b>
+    </div>
+
+    <nav id="dieuHuong">
+      <button class="tab dang" data-man="soan"     data-icon="soan">Soạn &amp; đăng<kbd>1</kbd></button>
+      <button class="tab"      data-man="baiDang"  data-icon="bai">Bài đăng<kbd>2</kbd></button>
+      <button class="tab"      data-man="tuongTac" data-icon="chat">Tương tác<kbd>3</kbd><span class="dem" id="demTuongTac" hidden>0</span></button>
+      <button class="tab"      data-man="caiDat"   data-icon="banh-rang">Cài đặt<kbd>4</kbd></button>
+    </nav>
+
+    <div class="ben-duoi">
+      <div class="han" id="hanMuc" hidden>
+        <div class="han-nhan">Hạn mức 24 giờ</div>
+        <div class="han-dong"><span>Bài đăng</span><b id="hanDang">–</b></div>
+        <div class="thanh"><i id="hanDangThanh"></i></div>
+        <div class="han-dong"><span>Trả lời</span><b id="hanTraLoi">–</b></div>
+        <div class="thanh"><i id="hanTraLoiThanh"></i></div>
+        <div class="han-dong"><span>Xoá</span><b id="hanXoa">–</b></div>
+        <div class="thanh"><i id="hanXoaThanh"></i></div>
+      </div>
+
+      <button class="chip" id="chipTaiKhoan" data-man="taiKhoan">
+        <img id="chipAnh" alt="" width="28" height="28">
+        <span class="chip-chu">
+          <b id="chipTen">Chưa kết nối</b>
+          <small id="chipPhu">Bấm để kết nối</small>
+        </span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═════════ Nội dung ═════════ -->
+  <main class="chinh">
+
+    <!-- ───── Tài khoản ───── -->
+    <section class="man" id="manTaiKhoan">
+      <header class="dinh"><h1>Tài khoản</h1></header>
+      <div class="than hep">
+
+        <div id="chuaKetNoi">
+          <div class="the">
+            <h2>Kết nối bằng token</h2>
+            <p class="dan">Lấy token 60 ngày ở <b>developers.facebook.com</b> → app <b>Threads Tool</b>
+            → Trường hợp sử dụng → Cài đặt → Công cụ tạo mã người dùng.</p>
+            <textarea id="oToken" rows="3" placeholder="THQ…" spellcheck="false"></textarea>
+            <div class="hang">
+              <button class="nut chinh" id="nutKetNoi">Kết nối</button>
+            </div>
+          </div>
+          <div class="luu-y canh">
+            <b>Token này đăng bài và trả lời thay bạn được.</b> App mã hoá nó bằng kho khoá của
+            Windows trước khi ghi ra đĩa, nhưng đừng dán chuỗi đó vào chỗ nào khác — nhóm chat,
+            ảnh chụp màn hình, hay git.
+          </div>
+        </div>
+
+        <div id="daKetNoi" hidden>
+          <div class="the ho-so">
+            <img id="hsAnh" alt="" width="56" height="56">
+            <div class="hs-chu">
+              <b id="hsTen">–</b>
+              <span id="hsUser">–</span>
+              <p id="hsBio"></p>
+            </div>
+            <button class="nut" id="nutNgat">Ngắt kết nối</button>
+          </div>
+
+          <div class="luoi-so" id="soHetHan"></div>
+
+          <div class="the">
+            <h2>Nơi cất dữ liệu</h2>
+            <p class="mono nho" id="duongDuLieu">–</p>
+            <p class="dan" id="tinhTrangMaHoa"></p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ───── Soạn & đăng ───── -->
+    <section class="man dang" id="manSoan">
+      <header class="dinh">
+        <h1>Soạn &amp; đăng</h1>
+        <div class="dinh-nut">
+          <button class="nut" id="nutHenGio">Hẹn giờ</button>
+          <button class="nut chinh" id="nutDangNgay">Đăng ngay<kbd>Ctrl↵</kbd></button>
+        </div>
+      </header>
+
+      <div class="than cot2">
+        <div>
+          <div class="the">
+            <textarea id="oChu" rows="7" placeholder="Có gì mới?"></textarea>
+            <div class="chan-o">
+              <small class="dem-chu" id="demChu">0 / 500</small>
+              <small class="dan" id="xemKhaiBao"></small>
+            </div>
+          </div>
+
+          <div class="the">
+            <label for="oChuDe">Chủ đề</label>
+            <input id="oChuDe" type="text" maxlength="50" placeholder="skincare" spellcheck="false">
+            <p class="goi-y">Hiện cạnh tên bạn dạng <b id="xemChuDe">@bạn › skincare</b>. Threads dùng
+            chủ đề để đưa bài tới người quan tâm, kể cả người chưa theo dõi bạn. Mỗi bài đúng một chủ đề.</p>
+          </div>
+
+          <div class="the">
+            <label for="oLink">Link tiếp thị liên kết</label>
+            <input id="oLink" type="url" placeholder="https://s.shopee.vn/…">
+
+            <label for="oKieuLink">Cách gắn link</label>
+            <select id="oKieuLink">
+              <option value="binh-luan">Đăng ở bình luận đầu — bài chính giữ tầm với</option>
+              <option value="trong-bai">Gắn thẳng vào bài — gọn hơn, nhưng bị hạ hiển thị</option>
+            </select>
+            <p class="goi-y">Threads hạ hiển thị bài có link ra ngoài. Chạy thử cả hai vài tuần
+            rồi xem tab Bài đăng để biết cách nào ăn hơn.</p>
+          </div>
+
+          <div class="the">
+            <label for="oAnh">Ảnh</label>
+            <input id="oAnh" type="url" placeholder="https://… đường dẫn ảnh công khai">
+            <div class="luu-y canh nho">
+              <b>Không tải ảnh từ máy lên được.</b> Máy chủ Meta phải tự tải ảnh về từ một địa chỉ
+              công khai, mà ổ đĩa máy bạn thì họ không với tới.
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="the" id="theHenGio" hidden>
+            <h2>Hẹn giờ</h2>
+            <div class="hen-gio">
+              <input id="oLuc" type="text" placeholder="DD/MM/YYYY HH:mm" spellcheck="false" autocomplete="off">
+              <input id="oLucChon" type="datetime-local" tabindex="-1" aria-hidden="true">
+              <button class="nut" id="nutLich" type="button" title="Chọn từ lịch"></button>
+            </div>
+            <p class="goi-y" id="ghiLuc"></p>
+            <button class="nut rong" id="nutThemHangDoi">Thêm vào hàng đợi</button>
+            <div class="luu-y canh nho">Hàng đợi chỉ chạy khi app đang mở. Tắt máy là không có gì đăng.</div>
+          </div>
+
+          <div class="the">
+            <div class="the-dau">
+              <h2>Hàng đợi</h2>
+              <span class="vien-so" id="demHangDoi">0</span>
+            </div>
+            <div id="dsHangDoi"></div>
+          </div>
+
+          <div class="tien-do" id="tienDoDang" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───── Bài đăng ───── -->
+    <section class="man" id="manBaiDang">
+      <header class="dinh">
+        <h1>Bài đăng</h1>
+        <div class="dinh-nut">
+          <select id="sapXep" class="gon">
+            <option value="timestamp">Mới nhất</option>
+            <option value="views">Lượt xem</option>
+            <option value="likes">Lượt thích</option>
+            <option value="replies">Bình luận</option>
+          </select>
+          <button class="nut" id="nutLamMoiTK">Làm mới</button>
+        </div>
+      </header>
+
+      <div class="than">
+        <div class="luoi-so" id="soTaiKhoan"></div>
+        <div class="the khong-lot">
+          <div class="bang-boc">
+            <table>
+              <thead><tr>
+                <th>Bài</th><th class="r">Xem</th><th class="r">Thích</th><th class="r">B.luận</th>
+                <th class="r">Đăng lại</th><th class="r">Chia sẻ</th><th>Chủ đề</th><th></th>
+              </tr></thead>
+              <tbody id="thanBangBai"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───── Tương tác ───── -->
+    <section class="man" id="manTuongTac">
+      <header class="dinh">
+        <h1>Tương tác</h1>
+        <div class="phan-doan" id="phanDoan">
+          <button class="pd dang" data-o="binhLuan">Bình luận<span class="dem-pd" id="demPdBinhLuan" hidden>0</span></button>
+          <button class="pd" data-o="nhacDen">Nhắc đến</button>
+          <button class="pd" data-o="timKiem">Tìm kiếm</button>
+        </div>
+      </header>
+
+      <div class="than">
+
+        <!-- Bình luận -->
+        <div class="o-tt dang" id="oBinhLuan">
+          <div class="hang giua">
+            <p class="dan">Máy soạn sẵn câu trả lời theo mẫu ở tab Cài đặt.
+            <b>Không có gì được gửi đi cho tới khi bạn bấm Gửi.</b></p>
+            <button class="nut" id="nutQuetBinhLuan">Quét bình luận mới</button>
+          </div>
+          <div class="tien-do" id="tienDoQuet" hidden></div>
+          <div id="dsBinhLuan"></div>
+        </div>
+
+        <!-- Nhắc đến -->
+        <div class="o-tt" id="oNhacDen">
+          <div class="hang giua">
+            <p class="dan">Các bài có nhắc tới <b id="tenNhacDen">bạn</b>.</p>
+            <button class="nut" id="nutQuetNhacDen">Tải lượt nhắc</button>
+          </div>
+          <div class="luu-y canh">
+            <b>Quyền này đang bị Meta giới hạn.</b> Chưa được duyệt truy cập nâng cao thì Meta
+            <b>chỉ trả về lượt nhắc từ người dùng thử của app này</b> — người lạ nhắc tên bạn sẽ
+            không hiện ra, mà endpoint vẫn trả về danh sách rỗng. Danh sách trống ở đây không có
+            nghĩa là không ai nhắc tới bạn.
+          </div>
+          <div id="dsNhacDen"></div>
+        </div>
+
+        <!-- Tìm kiếm -->
+        <div class="o-tt" id="oTimKiem">
+          <div class="the">
+            <div class="tim-hang">
+              <input id="oTuKhoa" type="text" placeholder="kem chống nắng" spellcheck="false">
+              <select id="oCheTim" class="gon">
+                <option value="KEYWORD">Từ khoá</option>
+                <option value="TAG">Chủ đề</option>
+              </select>
+              <select id="oKieuTim" class="gon">
+                <option value="TOP">Phổ biến</option>
+                <option value="RECENT">Mới nhất</option>
+              </select>
+              <button class="nut chinh" id="nutTim">Tìm</button>
+            </div>
+            <div class="tu-khoa-luu" id="dsTuKhoaLuu"></div>
+            <p class="goi-y">Meta cho <b>2.200 lượt tìm mỗi 24 giờ</b>, tính theo tài khoản chứ
+            không theo app. Truy vấn không ra kết quả thì không bị trừ.</p>
+          </div>
+          <div class="luu-y canh nho">
+            Trả lời người lạ thì phải đúng chỗ và đúng việc. Rải cùng một câu quảng cáo vào hàng
+            loạt bài là cách nhanh nhất để bị báo cáo và mất tài khoản.
+          </div>
+          <div id="dsTimKiem"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ───── Cài đặt ───── -->
+    <section class="man" id="manCaiDat">
+      <header class="dinh">
+        <h1>Cài đặt</h1>
+        <div class="dinh-nut">
+          <button class="nut chinh" id="nutLuuCaiDat">Lưu</button>
+        </div>
+      </header>
+
+      <div class="than hep">
+        <div class="the">
+          <h2>Khai báo tiếp thị liên kết</h2>
+          <p class="dan">Tự động nối vào cuối mọi bài <b>có gắn link</b>. Meta bắt buộc công khai
+          quan hệ có trả tiền — vì thế không có công tắc tắt, chỉ sửa được chữ.</p>
+          <textarea id="oKhaiBao" rows="4"></textarea>
+        </div>
+
+        <div class="the">
+          <div class="the-dau">
+            <h2>Mẫu trả lời</h2>
+            <button class="nut nho" id="nutThemMau">+ Thêm mẫu</button>
+          </div>
+          <p class="dan">Bình luận chứa một trong các từ khoá sẽ được soạn sẵn câu tương ứng.
+          Dùng <code>{gia}</code> làm chỗ trống để bạn tự điền lúc duyệt.</p>
+          <div id="dsMau"></div>
+        </div>
+
+        <div class="the">
+          <div class="the-dau">
+            <h2>Từ khoá theo dõi</h2>
+            <button class="nut nho" id="nutThemTuKhoa">+ Thêm</button>
+          </div>
+          <p class="dan">Hiện thành nút bấm nhanh ở tab Tương tác → Tìm kiếm.</p>
+          <div id="dsTuKhoaSua"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Hộp xác nhận cho thao tác không hoàn tác được -->
+<div class="lop-phu" id="phuXacNhan" hidden>
+  <div class="hop">
+    <h2 id="xnTieuDe">Xác nhận</h2>
+    <p class="dan" id="xnDan"></p>
+    <div class="xn-trich" id="xnTrich"></div>
+    <div class="hang phai">
+      <button class="nut" id="xnHuy">Huỷ<kbd>Esc</kbd></button>
+      <button class="nut nguy" id="xnDong">Xoá</button>
+    </div>
+  </div>
+</div>
+
+<div class="banh-mi-cot" id="banhMiCot"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

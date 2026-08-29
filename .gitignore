@@ -1,0 +1,9 @@
+node_modules/
+
+# Log của tiến trình chính khi chạy bằng Start-Process để đọc lỗi giao diện.
+# Có thể chứa nội dung bài đang soạn — đừng đưa lên git.
+log.txt
+log-loi.txt
+
+# Thư mục đóng gói do electron-builder sinh ra
+dist/

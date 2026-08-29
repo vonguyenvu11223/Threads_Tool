@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Threads Tool — Review tính năng</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --plane:#f9f9f7; --surf:#fcfcfb; --line:#e1e0d9; --truc:#c3c2b7;
+  --ink:#0b0b0b; --ink2:#52514e; --mo:#898781;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a;
+  --tot:#0ca30c; --canh:#fab219; --xau:#d03b3b;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --plane:#0d0d0d; --surf:#1a1a19; --line:#2c2c2a; --truc:#383835;
+  --ink:#fff; --ink2:#c3c2b7; --mo:#898781;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70;
+}}
+:root[data-theme="dark"]{
+  --plane:#0d0d0d; --surf:#1a1a19; --line:#2c2c2a; --truc:#383835;
+  --ink:#fff; --ink2:#c3c2b7; --mo:#898781;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+  font:400 15px/1.6 "Be Vietnam Pro",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:940px;margin:0 auto;padding:46px 26px 80px}
+h1,h2,h3{font-family:Archivo,system-ui,sans-serif;margin:0;text-wrap:balance}
+h1{font-size:36px;font-weight:700;letter-spacing:-.6px;line-height:1.1}
+h2{font-size:20px;font-weight:700;letter-spacing:-.2px}
+h3{font-size:15px;font-weight:600}
+p{margin:0;max-width:72ch}
+.n{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+code{font-family:"IBM Plex Mono",monospace;font-size:.88em;background:var(--plane);
+  border:1px solid var(--line);padding:1px 5px;border-radius:5px}
+
+.dau{border-bottom:2px solid var(--ink);padding-bottom:20px;margin-bottom:26px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--s1);margin-bottom:10px}
+.dau p{color:var(--ink2);margin-top:8px;font-size:15.5px}
+
+.o-so{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:11px;margin:24px 0}
+.o{background:var(--surf);border:1px solid var(--line);border-radius:11px;padding:14px 15px}
+.o span{display:block;font-size:10.5px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--mo);margin-bottom:5px}
+.o b{font-family:"IBM Plex Mono",monospace;font-size:23px;font-weight:600;line-height:1;display:block}
+.o small{display:block;margin-top:4px;font-size:11.5px;color:var(--ink2)}
+.o.tot b{color:var(--tot)} .o.canh b{color:var(--canh)} .o.mo b{color:var(--mo)}
+
+section{margin-top:40px}
+section>h2{padding-bottom:9px;border-bottom:1px solid var(--line);margin-bottom:15px;
+  display:flex;align-items:baseline;gap:11px}
+section>h2 .num{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;color:var(--s1)}
+.dan{color:var(--ink2);font-size:14.5px;margin-bottom:14px}
+
+.tbl{overflow-x:auto;margin-top:10px}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th{font-size:10.5px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--mo);
+  text-align:left;padding:8px 9px;border-bottom:1.5px solid var(--truc);white-space:nowrap}
+td{padding:9px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:hover td{background:var(--plane)}
+td.ten{min-width:150px}
+
+.tt{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:20px;
+  font-size:11px;font-weight:600;white-space:nowrap}
+.tt::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.tt.tot{color:var(--tot);background:color-mix(in srgb,var(--tot) 13%,transparent)}
+.tt.canh{color:var(--canh);background:color-mix(in srgb,var(--canh) 20%,transparent)}
+.tt.xau{color:var(--xau);background:color-mix(in srgb,var(--xau) 13%,transparent)}
+.tt.mo{color:var(--mo);background:color-mix(in srgb,var(--mo) 15%,transparent)}
+
+.the{background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-top:13px;break-inside:avoid}
+.the>h3{margin-bottom:4px}
+.the>.phu{font-size:12.5px;color:var(--mo);margin-bottom:12px}
+
+.y{background:var(--surf);border:1px solid var(--line);border-left:3px solid var(--s1);
+  border-radius:0 11px 11px 0;padding:14px 17px;margin-top:11px;break-inside:avoid}
+.y.tot{border-left-color:var(--tot)} .y.xau{border-left-color:var(--xau)} .y.canh{border-left-color:var(--canh)}
+.y h3{margin-bottom:5px}
+.y p{font-size:14px;color:var(--ink2)}
+.y p+p{margin-top:6px}
+.y .so{font-family:"IBM Plex Mono",monospace;font-weight:600;color:var(--ink)}
+
+ul{margin:8px 0 0;padding-left:20px;color:var(--ink2);font-size:14px}
+li{margin-bottom:5px}
+li b{color:var(--ink)}
+
+.ghi{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--mo)}
+.ghi p{max-width:none;margin-bottom:7px}
+.ghi b{color:var(--ink2)}
+
+@media print{
+  :root,:root[data-theme="dark"]{--plane:#fff;--surf:#fff;--line:#dcdcd6;--truc:#b8b7b0;
+    --ink:#111;--ink2:#444;--mo:#666}
+  body{font-size:10pt} .wrap{max-width:none;padding:0}
+  section{break-inside:avoid-page;margin-top:16pt}
+  .the,.y,table{break-inside:avoid}
+  h1{font-size:23pt} h2{font-size:13pt}
+  @page{margin:14mm 12mm}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="dau">
+  <p class="eyebrow">Bản review nội bộ · 27/08/2026</p>
+  <h1>Threads Tool — Tính năng hiện có</h1>
+  <p>Công cụ quản lý Threads chạy trên máy tính, dựng trong ngày 27/08/2026.
+  Bản review này ghi <b>đúng thứ đang có trong mã nguồn</b>, và phân biệt rõ cái đã
+  chạy thật với cái mới chỉ viết xong.</p>
+</header>
+
+<div class="o-so">
+  <div class="o"><span>Tổng mã nguồn</span><b>2.302</b><small>dòng, 7 tệp</small></div>
+  <div class="o"><span>Kênh IPC</span><b>21</b><small>giao diện ↔ tiến trình chính</small></div>
+  <div class="o"><span>Endpoint Meta</span><b>6</b><small>đang gọi thật</small></div>
+  <div class="o tot"><span>Đã chạy thật</span><b>7</b><small>trên 18 tính năng</small></div>
+  <div class="o canh"><span>Chưa thử</span><b>11</b><small>viết xong, chưa chạy</small></div>
+  <div class="o mo"><span>Chưa làm</span><b>5</b><small>cố ý để sau</small></div>
+</div>
+
+<section>
+  <h2><span class="num">01</span>Trạng thái từng tính năng</h2>
+  <p class="dan">Đây là phần quan trọng nhất của bản review. Một tính năng “đã viết xong”
+  không giống “đã chạy được” — và với công cụ gọi API bên thứ ba thì khoảng cách giữa hai
+  thứ đó rất rộng.</p>
+
+  <div class="tbl"><table>
+    <thead><tr><th>Tính năng</th><th>Trạng thái</th><th>Bằng chứng / vì sao chưa</th></tr></thead>
+    <tbody>
+      <tr><td class="ten"><b>Kết nối token</b></td><td><span class="tt tot">Đã chạy thật</span></td>
+        <td>Hồ sơ <code>@uv.neyugn_</code> tải được kèm avatar và tên</td></tr>
+      <tr><td class="ten"><b>Mã hoá token</b></td><td><span class="tt tot">Đã chạy thật</span></td>
+        <td>Tab Kết nối hiện “Mã hoá: Có — khoá của Windows”</td></tr>
+      <tr><td class="ten"><b>Đếm ngược hạn token</b></td><td><span class="tt tot">Đã chạy thật</span></td>
+        <td>Hiện 59 ngày, hết hạn 26/10/2026</td></tr>
+      <tr><td class="ten"><b>Đọc hạn mức Meta</b></td><td><span class="tt tot">Đã chạy thật</span></td>
+        <td>Thanh bên hiện 0/250 bài và 0/1000 trả lời</td></tr>
+      <tr><td class="ten"><b>Hàng đợi hẹn giờ</b></td><td><span class="tt tot">Đã chạy thật</span></td>
+        <td>Mục hẹn 14:33 chạy đúng giờ, trả về <code>baiId 18106108946333950</code></td></tr>
+      <tr><td class="ten"><b>Đăng bài chữ</b></td><td><span class="tt tot">Đã chạy thật</span></td>
+        <td>Qua đường hàng đợi; bài đã lên Threads</td></tr>
+      <tr><td class="ten"><b>Ô hẹn giờ DD/MM/YYYY</b></td><td><span class="tt tot">Đã chạy thật</span></td>
+        <td>Chạy 13 ca kiểm, gồm cả 31/02 và 29/02 năm không nhuận</td></tr>
+
+      <tr><td class="ten"><b>Gắn chủ đề</b> <code>topic_tag</code></td><td><span class="tt canh">Chưa xác nhận</span></td>
+        <td>Đã gửi <code>skincare</code> lên và Meta không báo lỗi, nhưng <b>chưa ai mở Threads kiểm</b> xem chủ đề có hiện cạnh tên không</td></tr>
+      <tr><td class="ten"><b>Nút “Đăng ngay”</b></td><td><span class="tt canh">Chưa thử</span></td>
+        <td>Bài duy nhất đã đăng đi qua hàng đợi, không qua nút này</td></tr>
+      <tr><td class="ten"><b>Link ở bình luận đầu</b></td><td><span class="tt canh">Chưa thử</span></td>
+        <td>Chưa đăng bài nào có link. Nghi là sẽ hiện thành chuỗi <code>1/2</code>, chưa kiểm</td></tr>
+      <tr><td class="ten"><b>Gắn link thẳng vào bài</b></td><td><span class="tt canh">Chưa thử</span></td>
+        <td>Chưa dùng chế độ này lần nào</td></tr>
+      <tr><td class="ten"><b>Khai báo tiếp thị liên kết</b></td><td><span class="tt canh">Chưa thử</span></td>
+        <td>Chỉ chèn khi có link, mà chưa bài nào có link</td></tr>
+      <tr><td class="ten"><b>Đăng bài kèm ảnh</b></td><td><span class="tt canh">Chưa thử</span></td>
+        <td>Cần một ảnh đã nằm sẵn trên máy chủ công khai</td></tr>
+      <tr><td class="ten"><b>Tab Thống kê</b></td><td><span class="tt canh">Chưa thử</span></td>
+        <td>Chưa mở lần nào kể từ khi có bài đầu tiên</td></tr>
+      <tr><td class="ten"><b>Hộp bình luận</b></td><td><span class="tt canh">Chưa thử</span></td>
+        <td>Tài khoản chưa có bình luận nào để quét</td></tr>
+      <tr><td class="ten"><b>Mẫu trả lời tự soạn</b></td><td><span class="tt canh">Chưa thử</span></td>
+        <td>4 mẫu mặc định đã có, chưa mẫu nào được kích hoạt</td></tr>
+      <tr><td class="ten"><b>Xoá bài</b></td><td><span class="tt canh">Chưa thử</span></td>
+        <td>Quyền <code>threads_delete</code> đã thêm nhưng <b>chưa tạo lại token</b> nên chưa dùng được</td></tr>
+      <tr><td class="ten"><b>Tự thử lại khi lỗi mạng</b></td><td><span class="tt canh">Chưa thử</span></td>
+        <td>Viết sau khi sự cố mạng đã qua, chưa gặp lại lỗi để kiểm</td></tr>
+
+      <tr><td class="ten">Nhiều tài khoản</td><td><span class="tt mo">Chưa làm</span></td>
+        <td>Đã bàn 27/08, chưa chốt hướng</td></tr>
+      <tr><td class="ten">Chuỗi bài nhiều phần</td><td><span class="tt mo">Chưa làm</span></td>
+        <td>Đã phác thảo, user chưa chốt có cần</td></tr>
+      <tr><td class="ten">Đăng video</td><td><span class="tt mo">Chưa làm</span></td>
+        <td>API có hỗ trợ, chưa dựng giao diện</td></tr>
+      <tr><td class="ten">Trả lời bằng AI</td><td><span class="tt mo">Chưa làm</span></td>
+        <td>Hiện dùng mẫu từ khoá cố định</td></tr>
+      <tr><td class="ten">Biểu đồ theo thời gian</td><td><span class="tt mo">Chưa làm</span></td>
+        <td>Tab Thống kê hiện chỉ có bảng</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2><span class="num">02</span>Năm màn hình</h2>
+
+  <div class="the">
+    <h3>Kết nối</h3>
+    <p class="phu">Cửa vào — mọi thứ khác đứng sau màn này</p>
+    <ul>
+      <li>Dán token, app <b>gọi thử API trước khi lưu</b> — sai là báo ngay chứ không lưu bừa rồi để người dùng tự đi tìm tệp mà xoá</li>
+      <li>Hiện hồ sơ: tên, username, avatar, tiểu sử</li>
+      <li><b>Đếm ngược ngày hết hạn</b>, đổi màu vàng dưới 20 ngày và đỏ dưới 7 ngày</li>
+      <li>Nói rõ token có được mã hoá hay không, và chỉ đường tới thư mục dữ liệu</li>
+      <li>Nút ngắt kết nối, xoá token khỏi máy</li>
+    </ul>
+  </div>
+
+  <div class="the">
+    <h3>Soạn &amp; đăng</h3>
+    <p class="phu">Màn dùng nhiều nhất</p>
+    <ul>
+      <li>Ô nội dung có <b>đếm ký tự</b> theo giới hạn 500 của Threads, tính cả dòng khai báo sẽ được chèn</li>
+      <li><b>Chủ đề</b> (<code>topic_tag</code>) — kiểm luật Meta tại chỗ: 1–50 ký tự, cấm <code>.</code> và <code>&amp;</code>, tự cắt dấu <code>#</code> ở đầu</li>
+      <li>Ô link tiếp thị liên kết, chọn được <b>hai cách gắn</b>: bình luận đầu hoặc gắn thẳng vào bài</li>
+      <li>Ô ảnh nhận đường dẫn công khai</li>
+      <li><b>Đăng ngay</b> hoặc <b>hẹn giờ</b> — ô hẹn giờ theo DD/MM/YYYY, gõ tay hoặc bấm 📅 mở lịch</li>
+      <li>Hàng đợi hiện trạng thái từng mục kèm lỗi nguyên văn nếu có</li>
+    </ul>
+  </div>
+
+  <div class="the">
+    <h3>Thống kê</h3>
+    <p class="phu">Chưa có số vì tài khoản mới</p>
+    <ul>
+      <li>Sáu ô tổng: người theo dõi, lượt xem, thích, bình luận, đăng lại, trích dẫn</li>
+      <li>Bảng từng bài với cột <b>Chủ đề</b> và <b>Link</b> — để về sau đối chiếu cách nào kéo được người</li>
+      <li>Sắp xếp theo mới nhất / lượt xem / thích / bình luận</li>
+      <li>Nút <b>Xoá</b> mỗi dòng, có hộp xác nhận hiện lại nội dung bài</li>
+    </ul>
+  </div>
+
+  <div class="the">
+    <h3>Hộp bình luận</h3>
+    <p class="phu">Bán tự động — cố ý</p>
+    <ul>
+      <li>Quét <b>15 bài gần nhất</b>, lấy toàn bộ cây bình luận của từng bài</li>
+      <li>Bỏ trả lời của chính mình và những cái đã xử lý ở lần quét trước</li>
+      <li><b>Máy soạn sẵn</b> câu trả lời theo mẫu từ khoá, người sửa rồi bấm gửi</li>
+      <li>Ba thao tác mỗi bình luận: <b>Gửi trả lời</b>, <b>Bỏ qua</b>, <b>Ẩn bình luận</b></li>
+    </ul>
+  </div>
+
+  <div class="the">
+    <h3>Cài đặt</h3>
+    <ul>
+      <li>Sửa chữ dòng khai báo tiếp thị liên kết — <b>không có công tắc tắt</b></li>
+      <li>Quản lý mẫu trả lời: danh sách từ khoá → câu soạn sẵn, thêm/xoá được</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">03</span>Ba quyết định thiết kế đáng nói</h2>
+
+  <div class="y tot">
+    <h3>Mọi lệnh gọi mạng nằm ở tiến trình chính, không ở giao diện</h3>
+    <p>Hai lý do. Một, <code>graph.threads.net</code> không đặt header CORS nên gọi từ tầng
+    hiển thị bị trình duyệt chặn thẳng. Hai, <b>token không bao giờ đi vào tầng hiển thị</b> —
+    một lỗi XSS trong giao diện cũng không lấy được nó.</p>
+  </div>
+
+  <div class="y tot">
+    <h3>Trả lời bình luận là bán tự động, không tự động hoàn toàn</h3>
+    <p>Máy chỉ soạn; người bấm gửi. Điều khoản Meta cấm tương tác tự động mang tính spam,
+    và trả lời máy móc dưới mỗi bình luận là cách nhanh nhất khiến người ta bỏ theo dõi.</p>
+  </div>
+
+  <div class="y tot">
+    <h3>Thử lại khi lỗi mạng, nhưng chỉ ở nhịp an toàn</h3>
+    <p>Đăng bài là hai nhịp: tạo hộp chứa rồi xuất bản. Hỏng ở nhịp đầu thì chắc chắn chưa
+    có gì lên Threads — thử lại được. Hỏng ở nhịp sau thì <b>không ai biết bài đã lên hay
+    chưa</b>, thử lại là nguy cơ đăng trùng lên trang người dùng.</p>
+    <p>Vì thế mỗi lỗi được gắn nhãn nhịp, và bộ hẹn giờ chỉ thử lại nhãn <code>tao-hop</code>,
+    tối đa 3 lần cách nhau 1 phút.</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">04</span>Giới hạn có thật — biết trước cho đỡ mất công</h2>
+
+  <div class="y xau">
+    <h3>Không tải ảnh từ máy lên được</h3>
+    <p>Máy chủ Meta phải <b>tự tải ảnh về</b> từ một địa chỉ công khai; ổ đĩa máy bạn thì họ
+    không với tới. Muốn đăng ảnh thì ảnh phải nằm sẵn trên một máy chủ nào đó. Đây là giới
+    hạn của API, không phải thiếu sót của app.</p>
+  </div>
+
+  <div class="y xau">
+    <h3>Hẹn giờ chỉ chạy khi app đang mở</h3>
+    <p>Hàng đợi kiểm mỗi 30 giây trong tiến trình app. Không có máy chủ nào chạy hộ — hẹn
+    3 giờ sáng rồi tắt máy đi ngủ là không có gì đăng.</p>
+  </div>
+
+  <div class="y canh">
+    <h3>Threads hạ hiển thị bài có link ra ngoài</h3>
+    <p>Giống Facebook và X. Vì thế app dựng sẵn <b>hai đường gắn link</b> để đo, chứ không
+    chọn hộ: đăng ở bình luận đầu (bài chính giữ tầm với) hoặc gắn thẳng vào bài (gọn hơn).
+    Chưa có số liệu nào cho biết đường nào ăn hơn với tài khoản này.</p>
+  </div>
+
+  <div class="y canh">
+    <h3>Token sống 60 ngày, tự gia hạn nhưng chỉ khi app được mở</h3>
+    <p>App gia hạn khi token đã dùng quá 45 ngày. Không mở app suốt 60 ngày thì token chết
+    và phải quay lại <code>developers.facebook.com</code> tạo mã mới.</p>
+    <p>⚠️ Meta chỉ cho gia hạn khi token đã sống <b>quá 24 giờ</b> — gọi sớm hơn là trả lỗi
+    chứ không trả token.</p>
+  </div>
+
+  <div class="y canh">
+    <h3>Thêm quyền mới thì phải tạo lại token</h3>
+    <p>Phạm vi quyền đóng cứng vào token lúc sinh ra. Đây đang là lý do nút Xoá chưa dùng
+    được: quyền <code>threads_delete</code> đã thêm trên trang cấu hình, nhưng token trong app
+    vẫn là token cũ.</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">05</span>Bốn cái bẫy đã vấp trong ngày</h2>
+  <p class="dan">Ghi lại vì cả bốn đều <b>im lặng</b> — không lỗi, không thông báo, chỉ là thứ
+  gì đó không chạy. Loại bẫy tốn thời gian nhất.</p>
+
+  <div class="y xau">
+    <h3>1. <code>const tt</code> trùng tên với <code>window.tt</code> của preload</h3>
+    <p><code>contextBridge.exposeInMainWorld</code> gắn thuộc tính <b>không cấu hình lại được</b>
+    lên window. Khai <code>const</code> trùng tên ở tầng ngoài cùng là <b>lỗi cú pháp</b> — cả
+    tệp không chạy nổi một dòng, mọi <code>addEventListener</code> không được gắn.</p>
+    <p>Nhìn từ ngoài: giao diện vẽ ra đẹp đẽ, bấm nút không phản hồi gì cả.
+    <b>Cách chữa:</b> đặt tên biến khác.</p>
+  </div>
+
+  <div class="y xau">
+    <h3>2. Lỗi giao diện Electron biến mất hoàn toàn</h3>
+    <p>Không có cửa sổ đỏ, không thông báo. <b>Cách chữa:</b> tiến trình chính lắng nghe
+    <code>console-message</code> và in ra ngoài.</p>
+    <p>⚠️ Chữ ký sự kiện này <b>đã đổi</b> ở Electron 36+ — từ 5 tham số rời thành một object.
+    Bắt sai dạng thì log in ra <code>undefined</code>, lại tưởng không có lỗi.</p>
+  </div>
+
+  <div class="y xau">
+    <h3>3. Đặt <code>ELECTRON_RUN_AS_NODE</code> rỗng là chưa đủ trong bash</h3>
+    <p>VS Code đặt sẵn biến này <code>=1</code>. Gán rỗng trong Git Bash vẫn để biến
+    <b>tồn tại</b>, mà Electron chỉ kiểm sự tồn tại — app chết ở tầng C++ với thông điệp
+    chẳng liên quan gì: <code>Assertion failed: (isolate_data->snapshot_data()) != nullptr</code>.</p>
+    <p><b>Cách chữa:</b> <code>env -u ELECTRON_RUN_AS_NODE</code>. PowerShell thì
+    <code>$env:X=""</code> xoá hẳn nên không dính.</p>
+  </div>
+
+  <div class="y xau">
+    <h3>4. CSP chặn thuộc tính <code>style=""</code> trong HTML</h3>
+    <p><code>style-src 'self'</code> chặn style nội tuyến, nên một chỗ căn lề trong hộp xác
+    nhận bị bỏ qua âm thầm. <b>Cách chữa:</b> chuyển thành lớp CSS. Gán qua CSSOM trong
+    JavaScript thì vẫn được, chỉ thuộc tính trong HTML là bị chặn.</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">06</span>Việc nên làm tiếp</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Ưu tiên</th><th>Việc</th><th>Vì sao</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tt xau">Gấp</span></td><td class="ten"><b>Tạo lại token</b></td>
+        <td>Mở khoá nút Xoá, và đồng hồ 60 ngày đếm lại từ đầu</td></tr>
+      <tr><td><span class="tt xau">Gấp</span></td><td class="ten"><b>Kiểm <code>topic_tag</code> có ăn không</b></td>
+        <td>Mở tab Thống kê xem cột Chủ đề; đây là tính năng duy nhất đã gửi lên Meta mà chưa ai xác nhận kết quả</td></tr>
+      <tr><td><span class="tt canh">Cao</span></td><td class="ten"><b>Đăng thử bài có link</b></td>
+        <td>Kiểm cơ chế hai nhịp và xem nó hiện ra hình dạng gì trên Threads</td></tr>
+      <tr><td><span class="tt canh">Cao</span></td><td class="ten"><b>Chốt hướng nhiều tài khoản</b></td>
+        <td>Quản lý vài kênh thật thì dựng được ngay; dùng để gieo bình luận giả thì API là kênh tệ nhất</td></tr>
+      <tr><td><span class="tt mo">Vừa</span></td><td class="ten">Chuỗi bài nhiều phần</td>
+        <td>Cần khi đăng nội dung dài quá 500 ký tự</td></tr>
+      <tr><td><span class="tt mo">Vừa</span></td><td class="ten">Biểu đồ theo thời gian</td>
+        <td>Chỉ có ý nghĩa sau vài tuần có dữ liệu</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer class="ghi">
+  <p><b>Nguồn:</b> đọc trực tiếp mã nguồn trong <code>D:\threads-tool</code> ngày 27/08/2026 —
+  21 kênh IPC, 6 endpoint Meta, 2.302 dòng trên 7 tệp. Trạng thái “đã chạy thật” dựa trên
+  kết quả quan sát được trong phiên làm việc, không dựa trên suy đoán từ mã.</p>
+  <p><b>Giới hạn của bản review:</b> chưa có bộ kiểm tự động nào. Mọi kết luận “đã chạy thật”
+  đều đến từ một lần chạy tay, trên một tài khoản, trong một buổi. Tính năng chạy được một
+  lần không đồng nghĩa với chạy ổn định.</p>
+  <p><b>Chi tiết kỹ thuật</b> nằm ở <code>README.md</code> cùng thư mục. Bản review này nói
+  <i>có gì và ở trạng thái nào</i>; README nói <i>dùng thế nào</i>.</p>
+</footer>
+
+</div>
+</body>
+</html>

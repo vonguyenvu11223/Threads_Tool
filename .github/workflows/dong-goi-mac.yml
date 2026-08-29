@@ -1,0 +1,41 @@
+# Đóng gói bản macOS trên máy chủ macOS của GitHub.
+#
+# ⚠️ Phải chạy trên `macos-latest`, KHÔNG build từ Windows được. Đóng gói .dmg
+# cần công cụ của macOS, và quan trọng hơn: máy Apple Silicon TỪ CHỐI chạy mã
+# arm64 chưa được ký, mà ký thì phải gọi `codesign` — lệnh chỉ có trên macOS.
+#
+# ⚠️ Máy chủ macOS tính 10 PHÚT cho mỗi phút chạy thật trên repo riêng tư. Gói
+# miễn phí 2.000 phút/tháng nghĩa là còn ~200 phút macOS. Một lần build mất
+# khoảng 5 phút, nên dùng thỉnh thoảng thì thoải mái, đừng để chạy mỗi lần push.
+# Vì vậy quy trình này CHỈ chạy khi bấm tay hoặc khi gắn thẻ phiên bản.
+
+name: Đóng gói macOS
+
+on:
+  workflow_dispatch:        # bấm nút Run workflow trên GitHub
+  push:
+    tags: ['v*']            # hoặc khi đẩy thẻ kiểu v0.1.0
+
+jobs:
+  mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      # `npm ci` chứ không phải `npm install` — nó cài đúng bản trong
+      # package-lock.json, nên bản đóng gói khớp với bản đang chạy trên máy dev.
+      - run: npm ci
+
+      - name: Dựng .dmg
+        run: npx electron-builder --mac --publish never
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: threads-tool-mac
+          path: dist/*.dmg
+          retention-days: 14
