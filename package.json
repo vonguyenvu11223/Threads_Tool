@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "description": "Công cụ quản lý Threads chạy trên máy tính — đăng bài, thống kê, trả lời bình luận",
+  "author": "9FMedia",
   "main": "electron/main.cjs",
   "scripts": {
     "start": "electron .",
@@ -26,11 +27,14 @@
     "mac": {
       "category": "public.app-category.social-networking",
       "target": [
+        { "target": "zip", "arch": ["arm64", "x64"] },
         { "target": "dmg", "arch": ["arm64", "x64"] }
-      ]
+      ],
+      "identity": null
     },
     "dmg": {
-      "title": "Threads Tool",
+      "//": "Tên ổ đĩa KHÔNG dấu cách — hdiutil trên máy chủ CI hay nghẹn ở /Volumes/<tên có dấu cách>",
+      "title": "ThreadsTool",
       "contents": [
         { "x": 140, "y": 200, "type": "file" },
         { "x": 400, "y": 200, "type": "link", "path": "/Applications" }

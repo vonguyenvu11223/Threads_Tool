@@ -1,24 +1,32 @@
 # Đóng gói bản macOS trên máy chủ macOS của GitHub.
 #
-# ⚠️ Phải chạy trên `macos-latest`, KHÔNG build từ Windows được. Đóng gói .dmg
-# cần công cụ của macOS, và quan trọng hơn: máy Apple Silicon TỪ CHỐI chạy mã
-# arm64 chưa được ký, mà ký thì phải gọi `codesign` — lệnh chỉ có trên macOS.
+# ⚠️ Phải chạy trên `macos-latest`, KHÔNG build từ Windows được. Đóng gói cần
+# công cụ của macOS, và máy Apple Silicon TỪ CHỐI chạy mã arm64 chưa được ký,
+# mà ký thì phải gọi `codesign` — lệnh chỉ có trên macOS.
 #
-# ⚠️ Máy chủ macOS tính 10 PHÚT cho mỗi phút chạy thật trên repo riêng tư. Gói
-# miễn phí 2.000 phút/tháng nghĩa là còn ~200 phút macOS. Một lần build mất
-# khoảng 5 phút, nên dùng thỉnh thoảng thì thoải mái, đừng để chạy mỗi lần push.
-# Vì vậy quy trình này CHỈ chạy khi bấm tay hoặc khi gắn thẻ phiên bản.
+# ⚠️ Repo CÔNG KHAI thì Actions chạy miễn phí không giới hạn. Nếu sau này đổi
+# sang riêng tư thì máy chủ macOS tính 10 PHÚT cho mỗi phút chạy thật — gói miễn
+# phí còn khoảng 200 phút macOS/tháng. Vì vậy quy trình này chỉ chạy khi bấm tay
+# hoặc khi đẩy thẻ phiên bản, không chạy mỗi lần push.
 
 name: Đóng gói macOS
 
 on:
-  workflow_dispatch:        # bấm nút Run workflow trên GitHub
+  workflow_dispatch:
   push:
-    tags: ['v*']            # hoặc khi đẩy thẻ kiểu v0.1.0
+    tags: ['v*']
 
 jobs:
   mac:
     runs-on: macos-latest
+
+    env:
+      # ⚠️ Tắt dò chứng chỉ ký. Mặc định electron-builder đi tìm chứng chỉ trong
+      # Keychain; máy chủ CI không có cái nào, và ở một số bản nó KHÔNG bỏ qua
+      # êm mà làm hỏng cả lệnh. Tắt hẳn thì nó ký tạm (ad-hoc) — đủ để máy Apple
+      # Silicon chịu chạy, chỉ là người dùng phải bấm chuột phải → Mở lần đầu.
+      CSC_IDENTITY_AUTO_DISCOVERY: false
+
     steps:
       - uses: actions/checkout@v4
 
@@ -27,15 +35,32 @@ jobs:
           node-version: '20'
           cache: npm
 
-      # `npm ci` chứ không phải `npm install` — nó cài đúng bản trong
-      # package-lock.json, nên bản đóng gói khớp với bản đang chạy trên máy dev.
+      # `npm ci` chứ không phải `npm install` — cài đúng bản trong
+      # package-lock.json, nên bản đóng gói khớp với bản chạy trên máy dev.
       - run: npm ci
 
-      - name: Dựng .dmg
-        run: npx electron-builder --mac --publish never
+      # Dựng .zip TRƯỚC. Nó chỉ nén thư mục .app, không cần `hdiutil` nên gần
+      # như không bao giờ hỏng. Với việc gửi cho một người thì .zip là đủ:
+      # giải nén rồi kéo vào Applications.
+      - name: Dựng bản .zip
+        run: npx electron-builder --mac zip --publish never
+
+      # Rồi mới thử .dmg. Bước này ĐƯỢC PHÉP HỎNG: `hdiutil` hay trục trặc trên
+      # máy chủ CI, mà lúc đó .zip ở trên đã có sẵn để dùng.
+      - name: Dựng bản .dmg (cho phép hỏng)
+        continue-on-error: true
+        run: npx electron-builder --mac dmg --publish never
+
+      - name: Liệt kê thứ đã dựng được
+        if: always()
+        run: ls -lh dist/ || echo "(thư mục dist trống)"
 
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: threads-tool-mac
-          path: dist/*.dmg
+          path: |
+            dist/*.zip
+            dist/*.dmg
+          if-no-files-found: warn
           retention-days: 14
